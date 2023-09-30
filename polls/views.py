@@ -1,5 +1,6 @@
+from datetime import datetime
 from django.utils import timezone
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect,HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic
@@ -7,8 +8,18 @@ from django.views import generic
 from .models import Choice, Question
 
 
-class IndexView(generic.ListView):
+class IndexView(generic.TemplateView):
     template_name = "polls/index.html"
+
+    def get_context_data(self):
+        context = super().get_context_data()
+        context['now'] = datetime.now()
+        context['title'] = 'Hello world!'
+        return context
+
+
+class PollsIndexView(generic.ListView):
+    template_name = "polls/polls/index.html"
     context_object_name = "latest_question_list"
 
     def get_queryset(self):
@@ -21,9 +32,9 @@ class IndexView(generic.ListView):
         ]
 
 
-class DetailView(generic.DetailView):
+class PollsDetailView(generic.DetailView):
     model = Question
-    template_name = "polls/detail.html"
+    template_name = "polls/polls/detail.html"
 
     def get_queryset(self):
         """
@@ -32,9 +43,9 @@ class DetailView(generic.DetailView):
         return Question.objects.filter(pub_date__lte=timezone.now())
 
 
-class ResultsView(generic.DetailView):
+class PollsResultsView(generic.DetailView):
     model = Question
-    template_name = "polls/results.html"
+    template_name = "polls/polls/results.html"
 
 
 def vote(request, question_id):
@@ -45,7 +56,7 @@ def vote(request, question_id):
         # Redisplay the question voting form.
         return render(
             request,
-            "polls/detail.html",
+            "polls/polls/detail.html",
             {
                 "question": question,
                 "error_message": "You didn't select a choice.",
